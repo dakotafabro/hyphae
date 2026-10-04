@@ -1,0 +1,21 @@
+{
+  "name": "hyphae",
+  "version": "0.1.1",
+  "type": "extension",
+  "description": "Session continuity across machines - sporulate, fruit, and germinate working state through git",
+  "entry": "mcp/src/mcp_hyphae/server.py",
+  "files": ["mcp/src/mcp_hyphae/server.py", "README.md", "LICENSE", "plugin.json", "hooks", "scripts", "mcp/pyproject.toml", "mcp/uv.lock", "mcp/src"],
+  "scope": "global",
+  "token_cost": 1200,
+  "keywords": ["continuity", "session", "cross-machine", "state", "sporulate", "germinate", "handoff"],
+  "author": {
+    "name": "Dakota Fabro",
+    "github": "dakotafabro"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/dakotafabro/hyphae",
+  "agents": ["goose"],
+  "dependencies": [],
+  "conflicts": [],
+  "peers": ["spore"]
+}
