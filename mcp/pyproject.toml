@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-hyphae"
-version = "0.1.1"
+version = "0.1.2"
 description = "Session continuity for AI agents across machines - translocation through shared substrate"
 requires-python = ">=3.10"
 dependencies = [
