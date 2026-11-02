@@ -100,7 +100,7 @@ Active threads:
 
 ### `hyphae senescence`
 
-Mark a thread as complete. Graceful closure. Moves to `.hyphae/history/` with a completion timestamp.
+Mark a thread as complete. Graceful closure. Moves to `.hyphae/history/` with a completion timestamp. If that name has been closed before, the earlier record stays and the new one is written as `<name>--closed-<UTC time>.yaml`; the result's `moved_to` is the file actually written.
 
 ### `hyphae metrics`
 
