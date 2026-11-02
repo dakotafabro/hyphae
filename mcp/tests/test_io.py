@@ -121,3 +121,52 @@ def test_write_thread_creates_active_dir_if_missing(tmp_path, monkeypatch):
     monkeypatch.setenv("HYPHAE_REPO_ROOT", str(tmp_path))
     write_thread(tmp_path, "auto-dir", {"task": "test"})
     assert (tmp_path / ".hyphae" / "active" / "auto-dir.yaml").exists()
+
+
+def test_move_to_history_returns_the_written_file(hyphae_repo):
+    write_thread(hyphae_repo, "done-thread", {"task": "finished"})
+    dest = move_to_history(hyphae_repo, "done-thread", "")
+    assert dest == hyphae_repo / ".hyphae" / "history" / "done-thread.yaml"
+
+
+def test_move_to_history_nonexistent_thread_returns_none(hyphae_repo):
+    assert move_to_history(hyphae_repo, "ghost", "summary") is None
+
+
+def test_closing_a_reused_name_keeps_the_earlier_history(hyphae_repo):
+    history = hyphae_repo / ".hyphae" / "history"
+    write_thread(hyphae_repo, "pickup", {"thread_name": "pickup", "task": "first"})
+    first = move_to_history(hyphae_repo, "pickup", "first close")
+    write_thread(hyphae_repo, "pickup", {"thread_name": "pickup", "task": "second"})
+    second = move_to_history(hyphae_repo, "pickup", "second close")
+
+    assert first == history / "pickup.yaml"
+    assert second != first
+    assert second.name.startswith("pickup--closed-") and second.suffix == ".yaml"
+    assert yaml.safe_load(first.read_text())["completion_summary"] == "first close"
+    later = yaml.safe_load(second.read_text())
+    assert later["completion_summary"] == "second close"
+    assert later["thread_name"] == "pickup"
+
+
+def test_closing_a_name_three_times_in_one_second_keeps_all_three(hyphae_repo, monkeypatch):
+    import mcp_hyphae.core.io as io
+    from datetime import datetime, timezone
+
+    frozen = datetime(2026, 11, 2, 22, 58, 0, tzinfo=timezone.utc)
+
+    class Frozen(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return frozen
+
+    monkeypatch.setattr(io, "datetime", Frozen)
+    for n in range(3):
+        write_thread(hyphae_repo, "pickup", {"task": str(n)})
+        move_to_history(hyphae_repo, "pickup", f"close {n}")
+    names = sorted(f.name for f in (hyphae_repo / ".hyphae" / "history").glob("pickup*.yaml"))
+    assert names == [
+        "pickup--closed-20261102T225800Z-2.yaml",
+        "pickup--closed-20261102T225800Z.yaml",
+        "pickup.yaml",
+    ]
